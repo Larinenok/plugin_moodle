@@ -12,7 +12,7 @@ class block_calculator extends block_base {
 
     public function init() {
         $this->title = get_string('pluginname', 'block_calculator');
-        $this->formaction = (string)(new moodle_url('/blocks/calculator/process.php')); // переделать
+        $this->formaction = (string)(new moodle_url('/blocks/calculator/process.php'));
         $this->name_button = get_string('submit_button', 'block_calculator');
         $this->url_history = (string)(new moodle_url('/blocks/calculator/history.php'));
         $this->name_history = get_string('name_history', 'block_calculator');

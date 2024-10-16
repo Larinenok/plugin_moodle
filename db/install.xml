@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/calculator/db" VERSION="2023101400" COMMENT="Table for calculator history">
+    <TABLES>
+        <TABLE NAME="calculator_history" COMMENT="Calculator history">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key" />
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User ID" />
+                <FIELD NAME="a" TYPE="float" NOTNULL="true" COMMENT="Coefficient a" />
+                <FIELD NAME="b" TYPE="float" NOTNULL="true" COMMENT="Coefficient b" />
+                <FIELD NAME="c" TYPE="float" NOTNULL="true" COMMENT="Coefficient c" />
+                <FIELD NAME="d" TYPE="float" NOTNULL="false" COMMENT="Discriminant" />
+                <FIELD NAME="x1" TYPE="float" NOTNULL="false" COMMENT="Calculated solution - x1" />
+                <FIELD NAME="x2" TYPE="float" NOTNULL="false" COMMENT="Calculated solution - x2" />
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Timestamp" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+            </KEYS>
+        </TABLE>
+    </TABLES>
+</XMLDB>

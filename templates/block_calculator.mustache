@@ -1,0 +1,45 @@
+<div class="calculator_container">
+    <div class="calculator_body">
+        <form method="post" action="{{formaction}}">
+            <table>
+                <caption>(a)x² + (b)x + (c)</caption>
+                <tr>
+                    <th>
+                        <label for="a">a = </label>
+                    </th>
+                    <th>
+                        <input type="number" step="0.01" id="a" name="a" placeholder="{{placeholder}}" required>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <label for="b">b = </label>
+                    </th>
+                    <th>
+                        <input type="number" step="0.01" id="b" name="b" placeholder="{{placeholder}}" required>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <label for="c">c = </label>
+                    </th>
+                    <th>
+                        <input type="number" step="0.01" id="c" name="c" placeholder="{{placeholder}}" required>
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="2" style="text-align: center">
+                        <input type="submit" value="{{name_button}}">
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="2" style="text-align: right">
+                        <a class="calculator_a" href="{{url_history}}">
+                            {{name_history}}
+                        </a>
+                    </th>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>

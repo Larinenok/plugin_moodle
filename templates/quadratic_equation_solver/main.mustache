@@ -1,0 +1,42 @@
+<form method="post" action="{{formaction}}">
+    <table>
+        <caption>(a)x² + (b)x + (c)</caption>
+        <input type="text" id="calculatormodule" name="calculatormodule" value="{{calculatormodule}}" style="display: none;" required>
+        <tr>
+            <th>
+                <label for="a">a = </label>
+            </th>
+            <th>
+                <input type="number" step="0.01" id="a" name="a" placeholder="{{placeholder}}" required>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                <label for="b">b = </label>
+            </th>
+            <th>
+                <input type="number" step="0.01" id="b" name="b" placeholder="{{placeholder}}" required>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                <label for="c">c = </label>
+            </th>
+            <th>
+                <input type="number" step="0.01" id="c" name="c" placeholder="{{placeholder}}" required>
+            </th>
+        </tr>
+        <tr>
+            <th colspan="2" style="text-align: center">
+                <input type="submit" value="{{namebutton}}">
+            </th>
+        </tr>
+        <tr>
+            <th colspan="2" style="text-align: right">
+                <a class="calculator_a" href="{{urlhistory}}">
+                    {{namehistory}}
+                </a>
+            </th>
+        </tr>
+    </table>
+</form>

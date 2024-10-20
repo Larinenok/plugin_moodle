@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 require_once('../../config.php');
+require_once(__DIR__ . '/quadratic_equation_solver.php');
+require_once(__DIR__ . '/calculator_modules.php');
 
 global $DB, $OUTPUT, $PAGE;
 
@@ -9,39 +11,19 @@ $PAGE->set_url(new moodle_url('/blocks/calculator/history.php'));
 $PAGE->set_context(context_system::instance());
 $PAGE->set_title('History of Calculations');
 
-echo $OUTPUT->header();
+$calculatormodule = optional_param('calculatormodule', 'quadraticequationsolver', PARAM_TEXT);
+$calculatormodules = get_calculator_modules();
 
-$history_records = $DB->get_records('calculator_history', ['userid' => $USER->id]);
+$history = $calculatormodules[$calculatormodule]->read_db();
 
-if ($history_records) {
-    $history = [];
+$data = [
+    'calculatorcontent' => $calculatormodules[$calculatormodule]->get_history_form($history),
+];
 
-    foreach ($history_records as $record) {
-        $history[] = [
-            'a' => $record->a,
-            'b' => $record->b,
-            'c' => $record->c,
-            'd' => $record->d,
-            'x1' => $record->x1,
-            'x2' => $record->x2,
-            'timecreated' => date('Y-m-d H:i:s', (int)$record->timecreated)
-        ];
-    }
-
-    $data = [
-        'history' => $history,
-        'time' => get_string('time', 'block_calculator'),
-        'title_history' => get_string('title_history', 'block_calculator')
-    ];
-    $form = $OUTPUT->render_from_template('block_calculator/history', $data);
-} else {
-    $data = [
-        'no_history' => get_string('no_history', 'block_calculator'),
-        'time' => get_string('time', 'block_calculator'),
-        'title_history' => get_string('title_history', 'block_calculator')
-    ];
-    $form = $OUTPUT->render_from_template('block_calculator/history', $data);
+if (is_null($history)) {
+    $data['nohistory'] = get_string('nohistory', 'block_calculator');
 }
 
-echo $form;
+echo $OUTPUT->header();
+echo $OUTPUT->render_from_template('block_calculator/history', $data);;
 echo $OUTPUT->footer();

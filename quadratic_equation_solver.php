@@ -101,9 +101,9 @@ class quadratic_equation_solver_view extends quadratic_equation_solver_base impl
     private string $titlehistory;
 
     public function __construct() {
-        $this->formaction = (string)(new moodle_url('/blocks/calculator/process.php'));
+        $this->formaction = (string)(new moodle_url('/blocks/calculator/process.php')) . '?calculatormodule=' . self::NAME;
         $this->namebutton = get_string('submitbutton', 'block_calculator');
-        $this->urlhistory = (string)(new moodle_url('/blocks/calculator/history.php')) . '?calculator_module=' . self::NAME;
+        $this->urlhistory = (string)(new moodle_url('/blocks/calculator/history.php')) . '?calculatormodule=' . self::NAME;
         $this->namehistory = get_string('namehistory', 'block_calculator');
         $this->placeholder = get_string('placeholder', 'block_calculator');
 
@@ -129,7 +129,6 @@ class quadratic_equation_solver_view extends quadratic_equation_solver_base impl
 
         $data = [
             'formaction' => $this->formaction,
-            'calculatormodule' => self::NAME,
             'namebutton' => $this->namebutton,
             'urlhistory' => $this->urlhistory,
             'namehistory' => $this->namehistory,
@@ -179,7 +178,7 @@ class quadratic_equation_solver_view extends quadratic_equation_solver_base impl
         return $OUTPUT->render_from_template('block_calculator/quadratic_equation_solver/process', $data);
     }
 
-    public function get_history_form(array $history): string {
+    public function get_history_form(?array $history): string {
         global $OUTPUT;
 
         if (is_null($history)) {
@@ -234,7 +233,7 @@ class quadratic_equation_solver implements calculator_module {
         return $this->qesview->get_process_form();
     }
 
-    public function get_history_form(array $history): string {
+    public function get_history_form(?array $history): string {
         return $this->qesview->get_history_form($history);
     }
 }

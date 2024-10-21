@@ -14,13 +14,14 @@ $PAGE->set_title('History of Calculations');
 $calculatormodule = optional_param('calculatormodule', 'quadraticequationsolver', PARAM_TEXT);
 $calculatormodules = get_calculator_modules();
 
-$history = $calculatormodules[$calculatormodule]->read_db();
 
-$data = [
-    'calculatorcontent' => $calculatormodules[$calculatormodule]->get_history_form($history),
-];
+$history = $calculatormodules[$calculatormodule]->get_history_form($history);
 
-if (is_null($history)) {
+if (!is_null($history)) {
+    $data = [
+        'calculatorcontent' => $history,
+    ];
+} else {
     $data['nohistory'] = get_string('nohistory', 'block_calculator');
 }
 

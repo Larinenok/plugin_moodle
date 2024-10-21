@@ -15,12 +15,8 @@ $request = $_REQUEST;
 $calculatormodule = optional_param('calculatormodule', 'quadraticequationsolver', PARAM_TEXT);
 $calculatormodules = get_calculator_modules();
 
-$calculatormodules[$calculatormodule]->process_request($request);
-$calculatormodules[$calculatormodule]->calculate();
-$calculatormodules[$calculatormodule]->write_db();
-
 $data = [
-    'calculatorcontent' => $calculatormodules[$calculatormodule]->get_process_form(),
+    'calculatorcontent' => $calculatormodules[$calculatormodule]->get_process_form($request),
 ];
 
 echo $OUTPUT->header();

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/interfaces.php');
 
-class quadratic_equation_solver_base implements data_handler {
+class quadratic_equation_solver_data implements data_handler {
     public const string NAME = 'quadraticequationsolver';
 
     // Переменные для вычислений
@@ -94,7 +94,11 @@ class quadratic_equation_solver_db implements storage {
     public static function read_db(): ?array {
         global $DB, $USER;
 
-        $records = $DB->get_records('calculator_history', ['userid' => $USER->id]);
+        try {
+            $records = $DB->get_records('calculator_history', ['userid' => $USER->id]);
+        } catch (Exception $e) {
+            throw new Exception("Error reading from the database. {$e}");
+        }
 
         if (!$records) {
             return null;
@@ -179,11 +183,11 @@ class quadratic_equation_solver_view implements form_handler {
         return $OUTPUT->render_from_template('block_calculator/quadratic_equation_solver/process', $data);
     }
 
-    public static function get_history_form(?array $history, data_handler $datahandler): string {
+    public static function get_history_form(?array $history, data_handler $datahandler): ?string {
         global $OUTPUT;
 
         if (is_null($history)) {
-            return '';
+            return null;
         }
 
         $data = [
@@ -193,62 +197,5 @@ class quadratic_equation_solver_view implements form_handler {
         ];
 
         return $OUTPUT->render_from_template('block_calculator/quadratic_equation_solver/history', $data);
-    }
-}
-
-class quadratic_equation_solver implements calculator_module {
-    private static quadratic_equation_solver_base $qes;
-
-    public function __construct() {
-        self::$qes = new quadratic_equation_solver_base();
-    }
-
-    // quadratic_equation_solver_math
-    public static function calculate(data_handler $datahandler = null): array {
-        if ($datahandler === null) {
-            $datahandler = self::$qes;
-        }
-        return quadratic_equation_solver_math::calculate($datahandler);
-    }
-
-    // quadratic_equation_solver_db
-    public static function write_db(data_handler $datahandler = null) {
-        if ($datahandler === null) {
-            $datahandler = self::$qes;
-        }
-        quadratic_equation_solver_db::write_db($datahandler);
-    }
-
-    public static function read_db(): ?array {
-        return quadratic_equation_solver_db::read_db();
-    }
-
-    // quadratic_equation_solver_view
-    public static function process_request(array $request, data_handler $datahandler = null) {
-        if ($datahandler === null) {
-            $datahandler = self::$qes;
-        }
-        quadratic_equation_solver_view::process_request($request, $datahandler);
-    }
-
-    public static function get_main_form(data_handler $datahandler = null): string {
-        if ($datahandler === null) {
-            $datahandler = self::$qes;
-        }
-        return quadratic_equation_solver_view::get_main_form($datahandler);
-    }
-
-    public static function get_process_form(data_handler $datahandler = null): string {
-        if ($datahandler === null) {
-            $datahandler = self::$qes;
-        }
-        return quadratic_equation_solver_view::get_process_form($datahandler);
-    }
-
-    public static function get_history_form(?array $history, data_handler $datahandler = null): string {
-        if ($datahandler === null) {
-            $datahandler = self::$qes;
-        }
-        return quadratic_equation_solver_view::get_history_form($history, $datahandler);
     }
 }

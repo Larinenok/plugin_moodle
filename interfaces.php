@@ -16,7 +16,5 @@ interface form_handler {
     static function process_request(array $request, data_handler $datahandler);
     static function get_main_form(data_handler $datahandler): string;
     static function get_process_form(data_handler $datahandler): string;
-    static function get_history_form(?array $history, data_handler $datahandler): string;
+    static function get_history_form(?array $history, data_handler $datahandler): ?string;
 }
-
-interface calculator_module extends solver, storage, form_handler {}

@@ -3,49 +3,87 @@ declare(strict_types=1);
 
 require_once(__DIR__ . '/interfaces.php');
 
-abstract class quadratic_equation_solver_base {
+class quadratic_equation_solver_base implements data_handler {
     public const string NAME = 'quadraticequationsolver';
 
-    public static float $a = 0;
-    public static float $b = 0;
-    public static float $c = 0;
-    public static ?float $d = null;
-    public static ?float $x1 = null;
-    public static ?float $x2 = null;
-}
+    // Переменные для вычислений
+    public float $a = 0;
+    public float $b = 0;
+    public float $c = 0;
+    public ?float $d = null;
+    public ?float $x1 = null;
+    public ?float $x2 = null;
 
-class quadratic_equation_solver_math extends quadratic_equation_solver_base implements solver {
-    public function calculate(): array {
-        if (self::$a == 0) {
-            return [null, null, null];
-        }
+    // Переменные для главной формы
+    public string $formaction;
+    public string $namebutton;
+    public string $urlhistory;
+    public string $namehistory;
+    public string $placeholder;
 
-        self::$d = self::$b * self::$b - 4 * self::$a * self::$c;
+    // Переменные для формы вычисления
+    public string $azero;
+    public string $nosolution;
+    public string $namecalculation;
+    public string $nameequation;
+    public string $namediscriminant;
+    public string $nameresult;
 
-        if (self::$d == 0) {
-            self::$x1 = -self::$b / (2 * self::$a);
-        } elseif (self::$d > 0) {
-            self::$x1 = (-self::$b + sqrt(self::$d)) / (2 * self::$a);
-            self::$x2 = (-self::$b - sqrt(self::$d)) / (2 * self::$a);
-        }
+    // Переменные для формы истории
+    public string $time;
+    public string $titlehistory;
 
-        return [self::$d, self::$x1, self::$x2];
+    public function __construct() {
+        $this->formaction = (string)(new moodle_url('/blocks/calculator/process.php')) . '?calculatormodule=' . self::NAME;
+        $this->namebutton = get_string('submitbutton', 'block_calculator');
+        $this->urlhistory = (string)(new moodle_url('/blocks/calculator/history.php')) . '?calculatormodule=' . self::NAME;
+        $this->namehistory = get_string('namehistory', 'block_calculator');
+        $this->placeholder = get_string('placeholder', 'block_calculator');
+
+        $this->azero = get_string('azero', 'block_calculator');
+        $this->nosolution = get_string('nosolution', 'block_calculator');
+        $this->namecalculation = get_string('namecalculation', 'block_calculator');
+        $this->nameequation = get_string('nameequation', 'block_calculator');
+        $this->namediscriminant = get_string('namediscriminant', 'block_calculator');
+        $this->nameresult = get_string('nameresult', 'block_calculator');
+
+        $this->time = get_string('time', 'block_calculator');
+        $this->titlehistory = get_string('titlehistory', 'block_calculator');
     }
 }
 
-class quadratic_equation_solver_db extends quadratic_equation_solver_base implements storage {
-    public function write_db() {
+class quadratic_equation_solver_math implements solver {
+    public static function calculate(data_handler $datahandler): array {
+        if ($datahandler->a == 0) {
+            return [null, null, null];
+        }
+
+        $datahandler->d = $datahandler->b * $datahandler->b - 4 * $datahandler->a * $datahandler->c;
+
+        if ($datahandler->d == 0) {
+            $datahandler->x1 = -$datahandler->b / (2 * $datahandler->a);
+        } elseif ($datahandler->d > 0) {
+            $datahandler->x1 = (-$datahandler->b + sqrt($datahandler->d)) / (2 * $datahandler->a);
+            $datahandler->x2 = (-$datahandler->b - sqrt($datahandler->d)) / (2 * $datahandler->a);
+        }
+
+        return [$datahandler->d, $datahandler->x1, $datahandler->x2];
+    }
+}
+
+class quadratic_equation_solver_db implements storage {
+    public static function write_db(data_handler $datahandler) {
         global $USER, $DB;
 
         try {
             $record = new stdClass();
             $record->userid = $USER->id;
-            $record->a = self::$a;
-            $record->b = self::$b;
-            $record->c = self::$c;
-            $record->d = self::$d;
-            $record->x1 = self::$x1;
-            $record->x2 = self::$x2;
+            $record->a = $datahandler->a;
+            $record->b = $datahandler->b;
+            $record->c = $datahandler->c;
+            $record->d = $datahandler->d;
+            $record->x1 = $datahandler->x1;
+            $record->x2 = $datahandler->x2;
             $record->timecreated = time();
             $DB->insert_record('calculator_history', $record);
         } catch (Exception $e) {
@@ -53,7 +91,7 @@ class quadratic_equation_solver_db extends quadratic_equation_solver_base implem
         }
     }
 
-    public function read_db(): ?array {
+    public static function read_db(): ?array {
         global $DB, $USER;
 
         $records = $DB->get_records('calculator_history', ['userid' => $USER->id]);
@@ -80,105 +118,68 @@ class quadratic_equation_solver_db extends quadratic_equation_solver_base implem
     }
 }
 
-class quadratic_equation_solver_view extends quadratic_equation_solver_base implements form_handler {
-    // Переменные для главной формы
-    private string $formaction;
-    private string $namebutton;
-    private string $urlhistory;
-    private string $namehistory;
-    private string $placeholder;
-
-    // Переменные для формы вычисления
-    private string $azero;
-    private string $nosolution;
-    private string $namecalculation;
-    private string $nameequation;
-    private string $namediscriminant;
-    private string $nameresult;
-
-    // Переменные для формы истории
-    private string $time;
-    private string $titlehistory;
-
-    public function __construct() {
-        $this->formaction = (string)(new moodle_url('/blocks/calculator/process.php')) . '?calculatormodule=' . self::NAME;
-        $this->namebutton = get_string('submitbutton', 'block_calculator');
-        $this->urlhistory = (string)(new moodle_url('/blocks/calculator/history.php')) . '?calculatormodule=' . self::NAME;
-        $this->namehistory = get_string('namehistory', 'block_calculator');
-        $this->placeholder = get_string('placeholder', 'block_calculator');
-
-        $this->azero = get_string('azero', 'block_calculator');
-        $this->nosolution = get_string('nosolution', 'block_calculator');
-        $this->namecalculation = get_string('namecalculation', 'block_calculator');
-        $this->nameequation = get_string('nameequation', 'block_calculator');
-        $this->namediscriminant = get_string('namediscriminant', 'block_calculator');
-        $this->nameresult = get_string('nameresult', 'block_calculator');
-
-        $this->time = get_string('time', 'block_calculator');
-        $this->titlehistory = get_string('titlehistory', 'block_calculator');
+class quadratic_equation_solver_view implements form_handler {
+    public static function process_request(array $request, data_handler $datahandler) {
+        $datahandler->a = (float)$request['a'];
+        $datahandler->b = (float)$request['b'];
+        $datahandler->c = (float)$request['c'];
     }
 
-    public function process_request(array $request) {
-        self::$a = (float)$request['a'];
-        self::$b = (float)$request['b'];
-        self::$c = (float)$request['c'];
-    }
-
-    public function get_main_form(): string {
+    public static function get_main_form(data_handler $datahandler): string {
         global $OUTPUT;
 
         $data = [
-            'formaction' => $this->formaction,
-            'namebutton' => $this->namebutton,
-            'urlhistory' => $this->urlhistory,
-            'namehistory' => $this->namehistory,
-            'placeholder' => $this->placeholder
+            'formaction' => $datahandler->formaction,
+            'namebutton' => $datahandler->namebutton,
+            'urlhistory' => $datahandler->urlhistory,
+            'namehistory' => $datahandler->namehistory,
+            'placeholder' => $datahandler->placeholder
         ];
 
         return $OUTPUT->render_from_template('block_calculator/quadratic_equation_solver/main', $data);
     }
 
-    public function get_process_form(): string {
+    public static function get_process_form(data_handler $datahandler): string {
         global $OUTPUT;
 
-        $equation = self::$a . 'x²';
+        $equation = $datahandler->a . 'x²';
 
-        if (self::$b < 0) {
-            $equation .= '-' . abs(self::$b) . 'x';
+        if ($datahandler->b < 0) {
+            $equation .= '-' . abs($datahandler->b) . 'x';
         } else {
-            $equation .= '+' . abs(self::$b) . 'x';
+            $equation .= '+' . abs($datahandler->b) . 'x';
         }
 
-        if (self::$c < 0) {
-            $equation .= '-' . abs(self::$c);
+        if ($datahandler->c < 0) {
+            $equation .= '-' . abs($datahandler->c);
         } else {
-            $equation .= '+' . abs(self::$c);
+            $equation .= '+' . abs($datahandler->c);
         }
 
-        if (is_null(self::$d)) {
-            $result = $this->azero;
-        } elseif (self::$d < 0) {
-            $result = $this->nosolution;
-        } elseif (self::$d == 0) {
-            $result = 'x = ' . round(self::$x1, 2);
+        if (is_null($datahandler->d)) {
+            $result = $datahandler->azero;
+        } elseif ($datahandler->d < 0) {
+            $result = $datahandler->nosolution;
+        } elseif ($datahandler->d == 0) {
+            $result = 'x = ' . round($datahandler->x1, 2);
         } else {
-            $result = 'x1 = ' . round(self::$x1, 2) . ', x2 = ' . round(self::$x2, 2);
+            $result = 'x1 = ' . round($datahandler->x1, 2) . ', x2 = ' . round($datahandler->x2, 2);
         }
 
         $data = [
-            'namecalculation' => $this->namecalculation,
-            'nameequation' => $this->nameequation,
+            'namecalculation' => $datahandler->namecalculation,
+            'nameequation' => $datahandler->nameequation,
             'equation' => $equation,
-            'namediscriminant' => $this->namediscriminant,
-            'discriminant' => self::$d,
-            'nameresult' => $this->nameresult,
+            'namediscriminant' => $datahandler->namediscriminant,
+            'discriminant' => $datahandler->d,
+            'nameresult' => $datahandler->nameresult,
             'result' => $result,
         ];
 
         return $OUTPUT->render_from_template('block_calculator/quadratic_equation_solver/process', $data);
     }
 
-    public function get_history_form(?array $history): string {
+    public static function get_history_form(?array $history, data_handler $datahandler): string {
         global $OUTPUT;
 
         if (is_null($history)) {
@@ -187,8 +188,8 @@ class quadratic_equation_solver_view extends quadratic_equation_solver_base impl
 
         $data = [
             'history' => $history,
-            'time' => $this->time,
-            'titlehistory' => $this->titlehistory,
+            'time' => $datahandler->time,
+            'titlehistory' => $datahandler->titlehistory,
         ];
 
         return $OUTPUT->render_from_template('block_calculator/quadratic_equation_solver/history', $data);
@@ -196,44 +197,58 @@ class quadratic_equation_solver_view extends quadratic_equation_solver_base impl
 }
 
 class quadratic_equation_solver implements calculator_module {
-    private quadratic_equation_solver_math $qesmath;
-    private quadratic_equation_solver_db $qesdb;
-    private quadratic_equation_solver_view $qesview;
+    private static quadratic_equation_solver_base $qes;
 
     public function __construct() {
-        $this->qesmath = new quadratic_equation_solver_math();
-        $this->qesdb = new quadratic_equation_solver_db();
-        $this->qesview = new quadratic_equation_solver_view();
+        self::$qes = new quadratic_equation_solver_base();
     }
 
     // quadratic_equation_solver_math
-    public function calculate(): array {
-        return $this->qesmath->calculate();
+    public static function calculate(data_handler $datahandler = null): array {
+        if ($datahandler === null) {
+            $datahandler = self::$qes;
+        }
+        return quadratic_equation_solver_math::calculate($datahandler);
     }
 
     // quadratic_equation_solver_db
-    public function write_db() {
-        $this->qesdb->write_db();
+    public static function write_db(data_handler $datahandler = null) {
+        if ($datahandler === null) {
+            $datahandler = self::$qes;
+        }
+        quadratic_equation_solver_db::write_db($datahandler);
     }
 
-    public function read_db(): ?array {
-        return $this->qesdb->read_db();
+    public static function read_db(): ?array {
+        return quadratic_equation_solver_db::read_db();
     }
 
     // quadratic_equation_solver_view
-    public function process_request(array $request) {
-        $this->qesview->process_request($request);
+    public static function process_request(array $request, data_handler $datahandler = null) {
+        if ($datahandler === null) {
+            $datahandler = self::$qes;
+        }
+        quadratic_equation_solver_view::process_request($request, $datahandler);
     }
 
-    public function get_main_form(): string {
-        return $this->qesview->get_main_form();
+    public static function get_main_form(data_handler $datahandler = null): string {
+        if ($datahandler === null) {
+            $datahandler = self::$qes;
+        }
+        return quadratic_equation_solver_view::get_main_form($datahandler);
     }
 
-    public function get_process_form(): string {
-        return $this->qesview->get_process_form();
+    public static function get_process_form(data_handler $datahandler = null): string {
+        if ($datahandler === null) {
+            $datahandler = self::$qes;
+        }
+        return quadratic_equation_solver_view::get_process_form($datahandler);
     }
 
-    public function get_history_form(?array $history): string {
-        return $this->qesview->get_history_form($history);
+    public static function get_history_form(?array $history, data_handler $datahandler = null): string {
+        if ($datahandler === null) {
+            $datahandler = self::$qes;
+        }
+        return quadratic_equation_solver_view::get_history_form($history, $datahandler);
     }
 }

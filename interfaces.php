@@ -1,20 +1,22 @@
 <?php
 declare(strict_types=1);
 
+interface data_handler {}
+
 interface solver {
-    function calculate(): array;
+    static function calculate(data_handler $datahandler): array;
 }
 
 interface storage {
-    function write_db();
-    function read_db(): ?array;
+    static function write_db(data_handler $datahandler);
+    static function read_db(): ?array;
 }
 
 interface form_handler {
-    function process_request(array $request);
-    function get_main_form(): string;
-    function get_process_form(): string;
-    function get_history_form(?array $history): string;
+    static function process_request(array $request, data_handler $datahandler);
+    static function get_main_form(data_handler $datahandler): string;
+    static function get_process_form(data_handler $datahandler): string;
+    static function get_history_form(?array $history, data_handler $datahandler): string;
 }
 
 interface calculator_module extends solver, storage, form_handler {}
